@@ -8,6 +8,7 @@ import com.example.zhxy.service.TeacherService;
 import com.example.zhxy.util.CreateVerifiCodeImage;
 import com.example.zhxy.util.JwtHelper;
 import com.example.zhxy.util.Result;
+import com.example.zhxy.util.ResultCodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,14 +80,44 @@ public class SystemController {
 
         //存放用户响应信息
         Map<String, Object> map = new HashMap<>();
-        //调用服务层login方法，根据用户提交的logininfo信息，查询对应的admin信息
-        Admin login = adminService.login(loginForm);
-        //登录成功，将用户id和用户类型转换为token口令，作为信息响应给前端
-        if (login != null){
-            map.put("token", JwtHelper.createToken(login.getId().longValue(),1));
-        }else{
-            throw new RuntimeException("用户名或密码错误");
+        switch (loginForm.getUserType()){
+            case 1://管理员用户
+                //调用服务层login方法，根据用户提交的logininfo信息，查询对应的admin信息
+                Admin login = adminService.login(loginForm);
+                //登录成功，将用户id和用户类型转换为token口令，作为信息响应给前端
+                if (login != null){
+                    map.put("token", JwtHelper.createToken(login.getId().longValue(),0));
+                }else{
+                    throw new RuntimeException("用户名或密码错误");
+                }
+                return Result.ok(map);
+        }
+        return Result.fail().message("查无此用户");
+    }
+    @ApiOperation("通过token获取用户信息")
+    @GetMapping("/getInfo")
+    public Result getUserInfoByToken(HttpServletRequest request,
+                                     //获取用户请求中token
+                                     @RequestHeader("token")String token){
+        //检查token是否过期 20h
+        boolean isExpiration = JwtHelper.isExpiration(token);
+        if (isExpiration) {
+            return Result.build(null, ResultCodeEnum.TOKEN_ERROR);
+        }
+        //解析tokan，获取用户id和用户类型
+        Long userId = JwtHelper.getUserId(token);
+        Integer userType = JwtHelper.getUserType(token);
+        //创建一个map对象，用于存放响应数据
+        HashMap<String, Object> map= new HashMap<>();
+        switch (userType){
+            case 1:
+                Admin admin = adminService.getAdminByid(userId.intValue());
+                map.put("user",admin);
+                map.put("userType",1);
+                break;
         }
         return Result.ok(map);
     }
+
+
 }

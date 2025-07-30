@@ -13,4 +13,11 @@ public interface AdminService extends IService<Admin> {
      * @return
      */
     Admin login(LoginForm loginForm);
+
+    /**
+     * 查询用户
+     * @param id
+     * @return
+     */
+    Admin getAdminByid(int id);
 }
