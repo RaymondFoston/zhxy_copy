@@ -9,10 +9,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api(tags="年级控制器")
 @RestController
@@ -21,11 +20,11 @@ public class GradeController {
     @Autowired
     private GradeService gradeService;
 
-    /**gradeName似乎没有用？
+    /**
      * 查询年级信息，带分页条件
      * @param pagination
      * @param pageSize
-     * @param gradeName
+     * @param gradeName 这个是不是没有用？
      * @return
      */
     @ApiOperation("查询年级信息，带分页条件")
@@ -40,5 +39,37 @@ public class GradeController {
         //调用服务层方法
         IPage<Grade> pageRs = gradeService.getGradeByOpr(pageParam, gradeName);
         return Result.ok(pageRs);
+    }
+
+    @ApiOperation("获取所有Grade信息")
+    @GetMapping("/getGrades")
+    public Result getGrades(){
+       List<Grade> grades = gradeService.getGrades();
+       return Result.ok(grades);
+    }
+
+    /**
+     * 添加或修改年级信息
+     * @param grade
+     * @return
+     */
+    @ApiOperation("添加或修改年级信息")
+    @PostMapping("/saveOrUpdateGrade")
+    public Result saveOrUpdateGrade(@ApiParam("JSON的grade对象转换后台数据模型")@RequestBody Grade grade){
+        //调用服务层方法，实现添加或修改年纪信息
+        gradeService.saveOrUpdate(grade);
+        return Result.ok();
+    }
+
+    /**
+     * 删除一个或多个grade信息
+     * @param ids
+     * @return
+     */
+    @ApiOperation("删除一个或多个grade信息")
+    @DeleteMapping("/deleteGrade")
+    public Result deletGradeById(@ApiParam("JSON的年级id集合，映射为后台List<Integer>")@RequestBody List<Integer> ids){
+        gradeService.removeByIds(ids);
+        return Result.ok();
     }
 }

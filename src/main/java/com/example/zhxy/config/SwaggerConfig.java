@@ -40,9 +40,11 @@ public class SwaggerConfig{
     private ApiInfo apiInfo(){
         return new ApiInfoBuilder()
                 //API标题
-                .title("springboot中使用swagger2接口demo")
+                .title("智慧校园")
                 //文档描述
                 .description("接口说明")
+                .license("license")
+                .licenseUrl("http://localhost:9001/swagger-ui.html")
                 //服务条款url
                 .termsOfServiceUrl("http://localhost:9001/")
                 //版本号
